@@ -61,7 +61,6 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { PanelItemAPI } from '@/api';
 import TableComponent from '@/fixtures/grid/table/table.vue';
 
-import { ConfigStore } from '@/store/modules/config';
 import { LayerStore, layer } from '@/store/modules/layer';
 import FeatureLayer from 'ramp-geoapi/dist/layer/FeatureLayer';
 
@@ -75,12 +74,14 @@ export default class Screen1 extends Vue {
     @Prop() header!: String;
 
     @Get(LayerStore.layers) layers!: FeatureLayer[];
+    @Get('grid/grids') grids: any;
 
     quicksearch: String = '';
     grid: any = undefined;
 
     mounted() {
         this.grid = this.$refs.rvGrid;
+        console.log(this.layers, this.grids);
     }
 
     updateQuickSearch(): void {
