@@ -56,6 +56,7 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
 import { AgGridVue } from 'ag-grid-vue';
 import ColumnDropdown from '../column-dropdown.vue';
+import { GridStore, GridConfig, GridState } from '../store';
 
 // custom filter templates
 import CustomNumberFilter from './CustomNumberFilter.vue';
@@ -72,10 +73,12 @@ import CustomHeader from './CustomHeader.vue';
     }
 })
 export default class TableComponent extends Vue {
-    @Prop() layer!: Object;
+    @Prop() grid!: string;
     @Get(LayerStore.layers) layers!: FeatureLayer[];
+    @Get('grid/grids') gridConfig!: GridConfig;
 
     created() {
+        console.log(`props`,this.grid)
         this.gridOptions = {
             floatingFilter: true,
             suppressRowTransform: true,
@@ -115,7 +118,14 @@ export default class TableComponent extends Vue {
         this.rowData = [];
         this.columnDefs = [];
 
-        const fancyLayer: FeatureLayer = this.layers[1]; // this already got created somewhere, esrimap.vue i think
+        // TODO: remove this, replace with proper method of grabbing layer.
+        //const fancyLayer: FeatureLayer | undefined = this.layers.find(l => l.uid === this.openLayer);
+        const fancyLayer: FeatureLayer | undefined = this.layers[1];
+
+        if (fancyLayer === undefined) {
+            return;
+        }
+
         fancyLayer.isLayerLoaded().then(() => {
             const tableAttributePromise = fancyLayer.getTabularAttributes();
 
@@ -142,7 +152,7 @@ export default class TableComponent extends Vue {
                         if (col.filter === 'agNumberColumnFilter') {
                             this.setUpNumberFilter(col);
                         } else if (col.filter === 'agTextColumnFilter') {
-                            this.setUpTextFilter(col, this.lazyFilterEnabled)
+                            this.setUpTextFilter(col, this.lazyFilterEnabled);
                         }
 
                         this.columnDefs.push(col);
@@ -185,7 +195,6 @@ export default class TableComponent extends Vue {
         this.gridApi.onFilterChanged();
     }
 
-
     toggleShowFilters() {
         this.showFilters = !this.showFilters;
         this.gridOptions.floatingFilter = this.showFilters;
@@ -205,7 +214,7 @@ export default class TableComponent extends Vue {
     updateFilterStatus() {
         this.filterStatus = `${this.filterInfo.firstRow} - ${this.filterInfo.lastRow} of ${this.filterInfo.visibleRows} entries shown`;
 
-        if(this.filterInfo.visibleRows !== this.rowData.length) {
+        if (this.filterInfo.visibleRows !== this.rowData.length) {
             this.filterStatus += ` (filtered from ${this.rowData.length} records)`;
         }
     }

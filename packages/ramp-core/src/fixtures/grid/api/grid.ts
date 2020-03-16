@@ -3,7 +3,7 @@ import { APIScope } from '@/api/common';
 import { InstanceAPI } from '@/api/internal';
 import { PanelConfig } from '@/store/modules/panel';
 import { GridStore, GridConfig, GridState } from '../store';
-import { Get, Sync, Call } from 'vuex-pathify';
+import TableStateManager from '../store/table-state-manager';
 
 export class GridAPI extends APIScope {
     constructor(iApi: InstanceAPI, panel: PanelConfig) {
@@ -20,6 +20,28 @@ export class GridAPI extends APIScope {
      * @memberof GridAPI
      */
     open(id: string): void {
+        // get GridConfig for specified uid
+        let gridSettings: GridConfig | undefined = this.$vApp.$store.get(`grid/grids@${id}`);
+
+        // if no GridConfig exists for the given uid, create it.
+        if (gridSettings === undefined) {
+            gridSettings = {
+                uid: id,
+                state: new TableStateManager({
+                    table: {
+                        maximize: false,
+                        showFilter: false,
+                        filterByExtent: false,
+                        lazyFilter: false
+                    }
+                })
+            };
+
+            this.$vApp.$store.set('grid/addLayer!', gridSettings);
+        }
+
+        // open the grid
+        this.$vApp.$store.set('grid/open', id ? id : null);
         this.$iApi.panel.open(this.panel);
     }
 }

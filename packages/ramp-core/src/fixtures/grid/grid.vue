@@ -49,7 +49,7 @@
             <close @click="panel.close()"></close>
         </template>
         <template #content>
-            <TableComponent class="rv-grid" ref="rvGrid"></TableComponent>
+            <TableComponent class="rv-grid" ref="rvGrid" :grid="open"></TableComponent>
         </template>
     </panel-screen>
 </template>
@@ -74,14 +74,13 @@ export default class Screen1 extends Vue {
     @Prop() header!: String;
 
     @Get(LayerStore.layers) layers!: FeatureLayer[];
-    @Get('grid/grids') grids: any;
+    @Get('grid/open') open: any;
 
     quicksearch: String = '';
     grid: any = undefined;
 
     mounted() {
         this.grid = this.$refs.rvGrid;
-        console.log(this.layers, this.grids);
     }
 
     updateQuickSearch(): void {

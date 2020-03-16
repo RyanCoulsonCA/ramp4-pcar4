@@ -8,12 +8,7 @@ export class GridState {
      * @type {{ [uid: string]: GridConfig }}
      * @memberof GridState
      */
-    grids: { [uid: string]: GridConfig } = {
-        'd4f378ce-b557-42e2-80a3-aa767e84fc2c': {
-            uid: 'd4f378ce-b557-42e2-80a3-aa767e84fc2c',
-            state: <TableStateManager>{}
-        }
-    };
+    grids: { [uid: string]: GridConfig } = {};
 
     /**
      * The grid panel.
@@ -22,6 +17,14 @@ export class GridState {
      * @memberof GridState
      */
     panel: PanelConfig | null = null;
+
+    /**
+     * The uid of the layer that is currently open in the grid.
+     *
+     * @type {(string | null)}
+     * @memberof GridState
+     */
+    open: String | null = null;
 }
 
 export interface GridConfig {
@@ -31,7 +34,7 @@ export interface GridConfig {
      * @type {String}
      * @memberof GridItemConfig
      */
-    uid: String;
+    uid: string;
 
     /**
      * The state manager for this grid.

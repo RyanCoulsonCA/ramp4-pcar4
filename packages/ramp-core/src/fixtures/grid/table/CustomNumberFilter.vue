@@ -12,8 +12,8 @@ import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 export default class CustomNumberFilter extends Vue {
     data() {
         return {
-            minVal: 0,
-            maxVal: 0,
+            minVal: '',
+            maxVal: '',
             colDef: {}
         };
     }
@@ -23,7 +23,7 @@ export default class CustomNumberFilter extends Vue {
     }
 
     minValChanged() {
-        this.minVal = this.minVal !== '' && !isNaN(this.minVal) ? this.minVal : '';
+        this.minVal = this.minVal !== 'NaN' && !isNaN(this.minVal) ? this.minVal : '';
         let that = this;
         this.params.parentFilterInstance(function(instance: any) {
             that.setFilterModel(instance);
@@ -32,7 +32,7 @@ export default class CustomNumberFilter extends Vue {
     }
 
     maxValChanged() {
-        this.maxVal = this.maxVal !== '' && !isNaN(this.maxVal) ? this.maxVal : '';
+        this.maxVal = this.maxVal !== 'NaN' && !isNaN(this.maxVal) ? this.maxVal : '';
         let that = this;
         this.params.parentFilterInstance(function(instance: any) {
             that.setFilterModel(instance);
