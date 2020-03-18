@@ -10,33 +10,33 @@ import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 
 @Component({})
 export default class CustomNumberFilter extends Vue {
-    data() {
-        return {
-            minVal: '',
-            maxVal: '',
-            colDef: {}
-        };
-    }
+    minVal: any = '';
+    maxVal: any = '';
+    colDef: any;
 
     beforeMount() {
         this.colDef = this.params.column.colDef;
+        this.minVal = this.params.minValDefault;
+        this.maxVal = this.params.maxValDefault;
+        this.minValChanged();
+        this.maxValChanged();
     }
 
     minValChanged() {
-        this.minVal = this.minVal !== 'NaN' && !isNaN(this.minVal) ? this.minVal : '';
+        this.minVal = this.minVal !== '' && !isNaN(this.minVal) ? this.minVal : '';
         let that = this;
         this.params.parentFilterInstance(function(instance: any) {
             that.setFilterModel(instance);
-            const minKey = that.colDef.field + ' min';
+            that.params.stateManager.setColumnFilter(that.colDef.field + ' min', that.minVal);
         });
     }
 
     maxValChanged() {
-        this.maxVal = this.maxVal !== 'NaN' && !isNaN(this.maxVal) ? this.maxVal : '';
+        this.maxVal = this.maxVal !== '' && !isNaN(this.maxVal) ? this.maxVal : '';
         let that = this;
         this.params.parentFilterInstance(function(instance: any) {
             that.setFilterModel(instance);
-            const maxKey = that.colDef.field + ' max';
+            that.params.stateManager.setColumnFilter(that.colDef.field + ' max', that.maxVal);
         });
     }
 

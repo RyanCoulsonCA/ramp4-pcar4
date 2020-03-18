@@ -57,6 +57,7 @@ import 'ag-grid-community/dist/styles/ag-theme-material.css';
 import { AgGridVue } from 'ag-grid-vue';
 import ColumnDropdown from '../column-dropdown.vue';
 import { GridStore, GridConfig, GridState } from '../store';
+import TableStateManager from '../store/table-state-manager';
 
 // custom filter templates
 import CustomNumberFilter from './CustomNumberFilter.vue';
@@ -75,38 +76,24 @@ import CustomHeader from './CustomHeader.vue';
 export default class TableComponent extends Vue {
     @Prop() grid!: string;
     @Get(LayerStore.layers) layers!: FeatureLayer[];
-    @Get('grid/grids') gridConfig!: GridConfig;
+    @Sync(`grid/grids`) gridConfig!: GridConfig;
 
-    created() {
-        console.log(`props`,this.grid)
-        this.gridOptions = {
-            floatingFilter: true,
-            suppressRowTransform: true,
-            onFilterChanged: this.updateFilterInfo,
-            onBodyScroll: this.updateFilterInfo,
-            rowBuffer: 0
-        };
-    }
-
-    data() {
-        return {
-            columnApi: null,
-            columnDefs: null,
-            rowData: null,
-            quicksearch: null,
-            filterInfo: {
-                firstRow: 0,
-                lastRow: 0,
-                visibleRows: 0
-            },
-            filterStatus: '',
-            filterByExtent: false,
-            showFilters: true,
-            lazyFilterEnabled: true
-        };
-    }
+    columnApi = null;
+    columnDefs = null;
+    quicksearch = '';
+    filterInfo = {
+        firstRow: 0,
+        lastRow: 0,
+        visibleRows: 0
+    };
+    filterStatus = '';
+    lazyFilterEnabled = false;
 
     beforeMount() {
+        // load the grid config for this layer
+        this.config = this.gridConfig[this.grid];
+        console.log(this.config);
+
         // imported separate components
         this.frameworkComponents = {
             agColumnHeader: CustomHeader,
@@ -114,13 +101,21 @@ export default class TableComponent extends Vue {
             textFloatingFilter: CustomTextFilter
         };
 
+        // set up grid options
+        this.gridOptions = {
+            floatingFilter: this.config.state.showFilter,
+            suppressRowTransform: true,
+            onFilterChanged: this.updateFilterInfo,
+            onBodyScroll: this.updateFilterInfo,
+            rowBuffer: 0
+        };
+
         // should load row data here
         this.rowData = [];
         this.columnDefs = [];
 
         // TODO: remove this, replace with proper method of grabbing layer.
-        //const fancyLayer: FeatureLayer | undefined = this.layers.find(l => l.uid === this.openLayer);
-        const fancyLayer: FeatureLayer | undefined = this.layers[1];
+        const fancyLayer: FeatureLayer | undefined = this.layers.find(l => l.uid === this.grid);
 
         if (fancyLayer === undefined) {
             return;
@@ -150,9 +145,9 @@ export default class TableComponent extends Vue {
                     } else {
                         // set up column filters
                         if (col.filter === 'agNumberColumnFilter') {
-                            this.setUpNumberFilter(col);
+                            this.setUpNumberFilter(col, this.config.state);
                         } else if (col.filter === 'agTextColumnFilter') {
-                            this.setUpTextFilter(col, this.lazyFilterEnabled);
+                            this.setUpTextFilter(col, this.lazyFilterEnabled, this.config.state);
                         }
 
                         this.columnDefs.push(col);
@@ -185,7 +180,7 @@ export default class TableComponent extends Vue {
         this.lazyFilterEnabled = !this.lazyFilterEnabled;
         this.columnDefs.forEach((col: any) => {
             if (col.filter === 'agTextColumnFilter') {
-                this.setUpTextFilter(col, this.lazyFilterEnabled);
+                this.setUpTextFilter(col, this.lazyFilterEnabled, this.config.state);
             }
         });
         // reset column state
@@ -196,8 +191,7 @@ export default class TableComponent extends Vue {
     }
 
     toggleShowFilters() {
-        this.showFilters = !this.showFilters;
-        this.gridOptions.floatingFilter = this.showFilters;
+        this.gridOptions.floatingFilter = !this.gridOptions.floatingFilter;
         this.gridOptions.api.refreshHeader();
     }
 
@@ -219,18 +213,28 @@ export default class TableComponent extends Vue {
         }
     }
 
-    setUpNumberFilter(colDef: any) {
+    setUpNumberFilter(colDef: any, state: TableStateManager) {
+        let minVal = state.getColumnFilter(colDef.field + ' min') !== undefined ? state.getColumnFilter(colDef.field + ' min') : '';
+        let maxVal = state.getColumnFilter(colDef.field + ' max') !== undefined ? state.getColumnFilter(colDef.field + ' max') : '';
+
         colDef.floatingFilterComponent = 'numberFloatingFilter';
         colDef.filterParams.inRangeInclusive = true;
         colDef.floatingFilterComponentParams = {
-            suppressFilterButton: true
+            suppressFilterButton: true,
+            stateManager: state,
+            minValDefault: minVal,
+            maxValDefault: maxVal
         };
     }
 
-    setUpTextFilter(colDef: any, lazyFilterEnabled: any) {
+    setUpTextFilter(colDef: any, lazyFilterEnabled: any, state: TableStateManager) {
+        let value = state.getColumnFilter(colDef.field) !== undefined ? state.getColumnFilter(colDef.field) : '';
+
         colDef.floatingFilterComponent = 'textFloatingFilter';
         colDef.floatingFilterComponentParams = {
-            suppressFilterButton: true
+            suppressFilterButton: true,
+            stateManager: state,
+            defaultValue: value
         };
         // default to regex filtering for text columns
         if (!lazyFilterEnabled) {
@@ -351,18 +355,22 @@ export default class TableComponent extends Vue {
 }
 
 export default interface TableComponent {
+    config: GridConfig;
     gridOptions: any;
     gridApi: any;
     columnApi: any;
     columnDefs: any;
     rowData: any;
     frameworkComponents: any;
-    quicksearch: any;
-    filterInfo: any;
-    filterStatus: any;
+    quicksearch: string;
+    filterInfo: { 
+        firstRow: number; 
+        lastRow: number; 
+        visibleRows: number 
+    };
+    filterStatus: string;
     filterByExtent: any;
-    showFilters: any;
-    lazyFilterEnabled: any; // default mode set lazyFilters to true
+    lazyFilterEnabled: boolean; // default mode set lazyFilters to true
 }
 
 interface ColumnDefinition {

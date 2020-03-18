@@ -4,7 +4,6 @@ import { PanelConfig } from '@/store/modules/panel';
 import { ConfigStore } from '@/store/modules/config';
 import { LayerStore, layer } from '@/store/modules/layer';
 import { grid } from './store/index';
-import { Get, Sync, Call } from 'vuex-pathify';
 
 import GridV from './grid.vue';
 import { GridAPI } from './api/grid';
@@ -30,7 +29,7 @@ class GridFixture extends FixtureConfigHelper {
         this.vApp.$store.registerModule('grid', grid());
         this.$iApi.emit('gridApi', new GridAPI(this.$iApi, gridPanel));
 
-        const pApi3 = this.$iApi.panel.open(gridPanel);
+        //const pApi3 = this.$iApi.panel.open(gridPanel);
         console.log(this.$iApi);
     }
 

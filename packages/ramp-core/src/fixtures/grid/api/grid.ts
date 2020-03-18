@@ -29,10 +29,9 @@ export class GridAPI extends APIScope {
                 uid: id,
                 state: new TableStateManager({
                     table: {
-                        maximize: false,
-                        showFilter: false,
+                        showFilter: true,
                         filterByExtent: false,
-                        lazyFilter: false
+                        lazyFilter: true
                     }
                 })
             };

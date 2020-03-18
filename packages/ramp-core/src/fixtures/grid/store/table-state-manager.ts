@@ -9,7 +9,6 @@
 export default class TableStateManager {
     constructor(baseLayer: any) {
         this.baseLayer = baseLayer;
-        this.isMaximized = baseLayer.table.maximize || false;
         this.showFilter = baseLayer.table.showFilter !== undefined ? baseLayer.table.showFilter : true;
         this.filterByExtent = baseLayer.table.filterByExtent || false;
         this.lazyFilter = baseLayer.table.lazyFilter !== undefined ? baseLayer.table.lazyFilter : true;
@@ -31,14 +30,6 @@ export default class TableStateManager {
         this.columnFilters[colDefField] = newFilterValue;
     }
 
-    set maximized(maximized) {
-        this.isMaximized = maximized;
-    }
-
-    get maximized() {
-        return this.isMaximized;
-    }
-
     get colFilter() {
         return this.showFilter;
     }
@@ -58,7 +49,6 @@ export default class TableStateManager {
 
 export default interface TableStateManager {
     baseLayer: any;
-    isMaximized: boolean;
     showFilter: boolean;
     filterByExtent: boolean;
     lazyFilter: boolean;

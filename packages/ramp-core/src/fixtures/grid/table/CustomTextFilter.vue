@@ -9,16 +9,14 @@ import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 
 @Component({})
 export default class CustomTextFilter extends Vue {
-    data() {
-        return {
-            filterValue: '',
-            colDef: {}
-        };
-    }
-
+    filterValue: string = '';
+    colDef: any;
+    
     beforeMount() {
         // would like better way to access panel state manager, pass it down as a prop? (didn't know how to do this)
         this.colDef = this.params.column.colDef;
+        this.filterValue = this.params.defaultValue;
+        this.valueChanged();
     }
 
     valueChanged(): void {
@@ -29,6 +27,7 @@ export default class CustomTextFilter extends Vue {
                 type: 'contains',
                 filter: that.filterValue
             });
+            that.params.stateManager.setColumnFilter(that.colDef.field, that.filterValue);
             instance.onFilterChanged();
         });
     }
