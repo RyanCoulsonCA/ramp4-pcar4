@@ -9,50 +9,121 @@
 export default class TableStateManager {
     constructor(baseLayer: any) {
         this.baseLayer = baseLayer;
-        this.showFilter = baseLayer.table.showFilter !== undefined ? baseLayer.table.showFilter : true;
-        this.filterByExtent = baseLayer.table.filterByExtent || false;
-        this.lazyFilter = baseLayer.table.lazyFilter !== undefined ? baseLayer.table.lazyFilter : true;
-        this.columnFilters = {};
-        this.open = true;
-        this.columnState = null;
+        this._showFilter = baseLayer.table.showFilter !== undefined ? baseLayer.table.showFilter : true;
+        this._filterByExtent = baseLayer.table.filterByExtent || false;
+        this._lazyFilter = baseLayer.table.lazyFilter !== undefined ? baseLayer.table.lazyFilter : true;
+        this._columnFilters = {};
+        this._open = true;
+        this._columnState = null;
     }
 
+    /**
+     * Returns the stored filter value for the given column field.
+     *
+     * @param {*} colDefField
+     * @returns
+     * @memberof TableStateManager
+     */
     getColumnFilter(colDefField: any) {
-        return this.columnFilters[colDefField];
+        return this._columnFilters[colDefField];
     }
 
+    /**
+     * Saves the current value of the filter for the given column field.
+     *
+     * @param {*} colDefField
+     * @param {(string | number)} filterValue
+     * @memberof TableStateManager
+     */
     setColumnFilter(colDefField: any, filterValue: string | number) {
         let newFilterValue = filterValue;
         if (filterValue && typeof filterValue === 'string') {
             const escRegex = /[(!"#$%&'+,.\\/:;<=>?@[\]^`{|}~)]/g;
             newFilterValue = filterValue.replace(escRegex, '\\$&');
         }
-        this.columnFilters[colDefField] = newFilterValue;
+        this._columnFilters[colDefField] = newFilterValue;
     }
 
+    /**
+     * Returns whether column filters are enabled for the table.
+     *
+     * @memberof TableStateManager
+     */
     get colFilter() {
-        return this.showFilter;
+        return this._showFilter;
     }
 
-    set colFilter(show) {
-        this.showFilter = show;
+    /**
+     * Sets column filters to on or off.
+     *
+     * @memberof TableStateManager
+     */
+    set colFilter(val) {
+        this._showFilter = val;
     }
 
-    set isOpen(isOpen) {
-        this.open = isOpen;
+    /**
+     * Returns whether the filter mode is on lazy or not.
+     *
+     * @memberof TableStateManager
+     */
+    get lazyFilter() {
+        return this._lazyFilter;
     }
 
-    get isOpen() {
-        return this.open;
+    /**
+     * Sets the lazy filter to on or off.
+     *
+     * @memberof TableStateManager
+     */
+    set lazyFilter(val) {
+        this._lazyFilter = val;
     }
+
+    /**
+     * Returns whether the grid is filtering by map extent.
+     *
+     * @memberof TableStateManager
+     */
+    get filterByExtent() {
+        return this._filterByExtent;
+    }
+
+    /**
+     * Sets the extent filter to on or off.
+     *
+     * @memberof TableStateManager
+     */
+    set filterByExtent(val) {
+        this._filterByExtent = val;
+    }
+
+    /**
+     * Returns whether the grid is currently open.
+     *
+     * @memberof TableStateManager
+     */
+    get open() {
+        return this._open;
+    }
+    
+    /**
+     * Sets the grid status to open or closed.
+     *
+     * @memberof TableStateManager
+     */
+    set open(val) {
+        this._open = val;
+    }
+
 }
 
 export default interface TableStateManager {
     baseLayer: any;
-    showFilter: boolean;
-    filterByExtent: boolean;
-    lazyFilter: boolean;
-    columnFilters: any;
-    open: boolean;
-    columnState: any;
+    _showFilter: boolean;
+    _filterByExtent: boolean;
+    _lazyFilter: boolean;
+    _columnFilters: any;
+    _open: boolean;
+    _columnState: any;
 }

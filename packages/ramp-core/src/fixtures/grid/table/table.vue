@@ -64,6 +64,11 @@ import CustomNumberFilter from './CustomNumberFilter.vue';
 import CustomTextFilter from './CustomTextFilter.vue';
 import CustomHeader from './CustomHeader.vue';
 
+
+const NUM_TYPES: string[] = ['oid', 'double', 'integer'];
+const DATE_TYPE: string = 'date';
+const TEXT_TYPE: string = 'string';
+
 @Component({
     components: {
         'column-dropdown': ColumnDropdown,
@@ -103,7 +108,7 @@ export default class TableComponent extends Vue {
 
         // set up grid options
         this.gridOptions = {
-            floatingFilter: this.config.state.showFilter,
+            floatingFilter: this.config.state.colFilter,
             suppressRowTransform: true,
             onFilterChanged: this.updateFilterInfo,
             onBodyScroll: this.updateFilterInfo,
@@ -126,10 +131,10 @@ export default class TableComponent extends Vue {
 
             tableAttributePromise.then((tableAttributes: any) => {
                 ['rvSymbol', 'rvInteractive', ...tableAttributes.columns].forEach((column: any) => {
+                    let fieldInfo = tableAttributes.fields.find(field => field.name === column.data);
                     let col: ColumnDefinition = {
                         headerName: column.title || '',
                         field: column.data || column,
-                        filter: column.title == 'OBJECTID' ? 'agNumberColumnFilter' : 'agTextColumnFilter',
                         isSelector: false,
                         sortable: true,
                         lockPosition: true,
@@ -144,10 +149,12 @@ export default class TableComponent extends Vue {
                         this.setUpSymbolsAndInteractive(col, this.columnDefs);
                     } else {
                         // set up column filters
-                        if (col.filter === 'agNumberColumnFilter') {
+                        if (NUM_TYPES.indexOf(fieldInfo.type) > -1) {
                             this.setUpNumberFilter(col, this.config.state);
-                        } else if (col.filter === 'agTextColumnFilter') {
+                            col.filter = 'agNumberColumnFilter';
+                        } else if (fieldInfo.type === TEXT_TYPE) {
                             this.setUpTextFilter(col, this.lazyFilterEnabled, this.config.state);
+                            col.filter = 'agTextColumnFilter';
                         }
 
                         this.columnDefs.push(col);
@@ -192,6 +199,7 @@ export default class TableComponent extends Vue {
 
     toggleShowFilters() {
         this.gridOptions.floatingFilter = !this.gridOptions.floatingFilter;
+        this.config.state.colFilter = this.gridOptions.floatingFilter;
         this.gridOptions.api.refreshHeader();
     }
 
@@ -363,10 +371,10 @@ export default interface TableComponent {
     rowData: any;
     frameworkComponents: any;
     quicksearch: string;
-    filterInfo: { 
-        firstRow: number; 
-        lastRow: number; 
-        visibleRows: number 
+    filterInfo: {
+        firstRow: number;
+        lastRow: number;
+        visibleRows: number;
     };
     filterStatus: string;
     filterByExtent: any;
@@ -379,7 +387,7 @@ interface ColumnDefinition {
     headerTooltip?: String;
     alias?: String;
     width?: Number;
-    filter: String;
+    filter?: String;
     filterParams: Object;
     cellRenderer: Function;
     sortable: Boolean;

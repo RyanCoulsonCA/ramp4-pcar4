@@ -11,7 +11,7 @@ import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 export default class CustomTextFilter extends Vue {
     filterValue: string = '';
     colDef: any;
-    
+
     beforeMount() {
         // would like better way to access panel state manager, pass it down as a prop? (didn't know how to do this)
         this.colDef = this.params.column.colDef;
@@ -28,7 +28,7 @@ export default class CustomTextFilter extends Vue {
                 filter: that.filterValue
             });
             that.params.stateManager.setColumnFilter(that.colDef.field, that.filterValue);
-            instance.onFilterChanged();
+            that.params.api.onFilterChanged();
         });
     }
 
@@ -56,9 +56,9 @@ export default interface CustomTextFilter {
 .ag-floating-filter-full-body input,
 .ag-floating-filter-full-body select,
 .rv-global-search {
-    @apply bg-transparent text-black-75 h-24 pb-8 border-0 border-b-2
+    @apply bg-transparent text-black-75 h-24 pb-8 border-0 border-b-2;
 }
 .rv-input {
-    @apply m-0 py-1
+    @apply m-0 py-1;
 }
 </style>
