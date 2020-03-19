@@ -29,7 +29,7 @@ class GridFixture extends FixtureConfigHelper {
         this.vApp.$store.registerModule('grid', grid());
         this.$iApi.emit('gridApi', new GridAPI(this.$iApi, gridPanel));
 
-        //const pApi3 = this.$iApi.panel.open(gridPanel);
+        // temporarily throw the InstanceAPI in console for testing purposes.
         console.log(this.$iApi);
     }
 

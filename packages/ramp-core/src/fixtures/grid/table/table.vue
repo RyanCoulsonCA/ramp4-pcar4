@@ -81,10 +81,12 @@ const TEXT_TYPE: string = 'string';
 export default class TableComponent extends Vue {
     @Prop() grid!: string;
     @Get(LayerStore.layers) layers!: FeatureLayer[];
-    @Sync(`grid/grids`) gridConfig!: GridConfig;
+    @Sync(`grid/grids`) gridConfig!: { [uid: string]: GridConfig };
 
-    columnApi = null;
-    columnDefs = null;
+    columnApi: any = null;
+    columnDefs: any = [];
+    rowData: any = [];
+
     quicksearch = '';
     filterInfo = {
         firstRow: 0,
@@ -97,7 +99,6 @@ export default class TableComponent extends Vue {
     beforeMount() {
         // load the grid config for this layer
         this.config = this.gridConfig[this.grid];
-        console.log(this.config);
 
         // imported separate components
         this.frameworkComponents = {
@@ -115,12 +116,8 @@ export default class TableComponent extends Vue {
             rowBuffer: 0
         };
 
-        // should load row data here
-        this.rowData = [];
-        this.columnDefs = [];
-
         // TODO: remove this, replace with proper method of grabbing layer.
-        const fancyLayer: FeatureLayer | undefined = this.layers.find(l => l.uid === this.grid);
+        const fancyLayer: FeatureLayer | undefined = this.layers.find((l: any) => l.uid === this.grid);
 
         if (fancyLayer === undefined) {
             return;
@@ -131,7 +128,7 @@ export default class TableComponent extends Vue {
 
             tableAttributePromise.then((tableAttributes: any) => {
                 ['rvSymbol', 'rvInteractive', ...tableAttributes.columns].forEach((column: any) => {
-                    let fieldInfo = tableAttributes.fields.find(field => field.name === column.data);
+                    let fieldInfo = tableAttributes.fields.find((field: any) => field.name === column.data);
                     let col: ColumnDefinition = {
                         headerName: column.title || '',
                         field: column.data || column,
@@ -355,7 +352,7 @@ export default class TableComponent extends Vue {
 
     clearColumnFilters() {
         this.gridApi.setQuickFilter(null);
-        this.quicksearch = null;
+        this.quicksearch = '';
 
         this.gridOptions.api.setFilterModel({});
         this.gridApi.refreshHeader();
