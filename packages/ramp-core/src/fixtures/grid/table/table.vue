@@ -62,8 +62,8 @@ import TableStateManager from '../store/table-state-manager';
 // custom filter templates
 import CustomNumberFilter from './CustomNumberFilter.vue';
 import CustomTextFilter from './CustomTextFilter.vue';
+import CustomSelectorFilter from './CustomSelectorFilter.vue';
 import CustomHeader from './CustomHeader.vue';
-
 
 const NUM_TYPES: string[] = ['oid', 'double', 'integer'];
 const DATE_TYPE: string = 'date';
@@ -103,7 +103,8 @@ export default class TableComponent extends Vue {
         this.frameworkComponents = {
             agColumnHeader: CustomHeader,
             numberFloatingFilter: CustomNumberFilter,
-            textFloatingFilter: CustomTextFilter
+            textFloatingFilter: CustomTextFilter,
+            selectorFloatingFilter: CustomSelectorFilter
         };
 
         // set up grid options
@@ -128,14 +129,13 @@ export default class TableComponent extends Vue {
 
             tableAttributePromise.then((tableAttributes: any) => {
                 ['rvSymbol', 'rvInteractive', ...tableAttributes.columns].forEach((column: any) => {
-
                     // retrieve the field info for the column
                     let fieldInfo = tableAttributes.fields.find((field: any) => field.name === column.data);
 
                     let col: ColumnDefinition = {
                         headerName: column.title || '',
                         field: column.data || column,
-                        isSelector: false,
+                        isSelector: true,
                         sortable: true,
                         lockPosition: true,
                         filterParams: {},
@@ -154,7 +154,12 @@ export default class TableComponent extends Vue {
                             this.setUpNumberFilter(col, this.config.state);
                             col.filter = 'agNumberColumnFilter';
                         } else if (fieldInfo.type === TEXT_TYPE) {
-                            this.setUpTextFilter(col, this.config.state);
+                            if (col.isSelector) {
+                                this.setUpSelectorFilter(col, tableAttributes.rows, this.config.state);
+                            } else {
+                                this.setUpTextFilter(col, this.config.state);
+                            }
+
                             col.filter = 'agTextColumnFilter';
                         }
 
@@ -181,7 +186,6 @@ export default class TableComponent extends Vue {
         this.gridApi.setQuickFilter(this.quicksearch);
     }
 
-
     toggleShowFilters() {
         this.gridOptions.floatingFilter = !this.gridOptions.floatingFilter;
         this.config.state.colFilter = this.gridOptions.floatingFilter;
@@ -204,6 +208,19 @@ export default class TableComponent extends Vue {
         if (this.filterInfo.visibleRows !== this.rowData.length) {
             this.filterStatus += ` (filtered from ${this.rowData.length} records)`;
         }
+    }
+
+    setUpSelectorFilter(colDef: any, rowData: any, state: TableStateManager) {
+        let value = state.getColumnFilter(colDef.field) !== undefined ? state.getColumnFilter(colDef.field) : '';
+
+        colDef.floatingFilterComponent = 'selectorFloatingFilter';
+        colDef.filterParams.inRangeInclusive = true;
+        colDef.floatingFilterComponentParams = {
+            suppressFilterButton: true,
+            stateManager: state,
+            defaultValue: value,
+            rowData: rowData
+        };
     }
 
     setUpNumberFilter(colDef: any, state: TableStateManager) {
