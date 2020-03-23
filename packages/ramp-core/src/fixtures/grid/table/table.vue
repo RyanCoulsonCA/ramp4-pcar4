@@ -63,6 +63,7 @@ import TableStateManager from '../store/table-state-manager';
 import CustomNumberFilter from './CustomNumberFilter.vue';
 import CustomTextFilter from './CustomTextFilter.vue';
 import CustomSelectorFilter from './CustomSelectorFilter.vue';
+import CustomDateFilter from './CustomDateFilter.vue';
 import CustomHeader from './CustomHeader.vue';
 
 const NUM_TYPES: string[] = ['oid', 'double', 'integer'];
@@ -74,6 +75,8 @@ const TEXT_TYPE: string = 'string';
         'column-dropdown': ColumnDropdown,
         AgGridVue,
         CustomNumberFilter,
+        CustomSelectorFilter,
+        CustomDateFilter,
         CustomTextFilter,
         CustomHeader
     }
@@ -104,7 +107,8 @@ export default class TableComponent extends Vue {
             agColumnHeader: CustomHeader,
             numberFloatingFilter: CustomNumberFilter,
             textFloatingFilter: CustomTextFilter,
-            selectorFloatingFilter: CustomSelectorFilter
+            selectorFloatingFilter: CustomSelectorFilter,
+            dateFloatingFilter: CustomDateFilter
         };
 
         // set up grid options
@@ -128,14 +132,17 @@ export default class TableComponent extends Vue {
             const tableAttributePromise = fancyLayer.getTabularAttributes();
 
             tableAttributePromise.then((tableAttributes: any) => {
-                ['rvSymbol', 'rvInteractive', ...tableAttributes.columns].forEach((column: any) => {
-                    // retrieve the field info for the column
-                    let fieldInfo = tableAttributes.fields.find((field: any) => field.name === column.data);
+                ['rvSymbol', 'rvInteractive', 'TMP_DATE', ...tableAttributes.columns].forEach((column: any) => {
+                    tableAttributes.fields.push({
+                        alias: 'Date',
+                        name: 'TMP_DATE',
+                        type: 'date'
+                    });
 
                     let col: ColumnDefinition = {
                         headerName: column.title || '',
                         field: column.data || column,
-                        isSelector: true,
+                        isSelector: false,
                         sortable: true,
                         lockPosition: true,
                         filterParams: {},
@@ -145,6 +152,9 @@ export default class TableComponent extends Vue {
                         }
                     };
 
+                    // retrieve the field info for the column
+                    let fieldInfo = tableAttributes.fields.find((field: any) => field.name === col.field);
+
                     if (column === 'rvSymbol' || column === 'rvInteractive') {
                         this.setUpSymbolsAndInteractive(col, this.columnDefs);
                     } else {
@@ -153,6 +163,9 @@ export default class TableComponent extends Vue {
                         if (NUM_TYPES.indexOf(fieldInfo.type) > -1) {
                             this.setUpNumberFilter(col, this.config.state);
                             col.filter = 'agNumberColumnFilter';
+                        } else if (fieldInfo.type === DATE_TYPE) {
+                            this.setUpDateFilter(col, this.config.state);
+                            col.filter = 'agDateColumnFilter';
                         } else if (fieldInfo.type === TEXT_TYPE) {
                             if (col.isSelector) {
                                 this.setUpSelectorFilter(col, tableAttributes.rows, this.config.state);
@@ -168,7 +181,11 @@ export default class TableComponent extends Vue {
                 });
 
                 // load layer rows
+                console.log(tableAttributes.rows);
                 this.rowData = tableAttributes.rows;
+                this.rowData.forEach((r: any) => {
+                    r['TMP_DATE'] = '05/26/1998';
+                });
                 this.updateFilterInfo();
             });
         });
@@ -208,6 +225,32 @@ export default class TableComponent extends Vue {
         if (this.filterInfo.visibleRows !== this.rowData.length) {
             this.filterStatus += ` (filtered from ${this.rowData.length} records)`;
         }
+    }
+
+    setUpDateFilter(colDef: any, state: TableStateManager) {
+        let minVal = state.getColumnFilter(colDef.field + ' min') !== undefined ? state.getColumnFilter(colDef.field + ' min') : '';
+        let maxVal = state.getColumnFilter(colDef.field + ' max') !== undefined ? state.getColumnFilter(colDef.field + ' max') : '';
+
+        colDef.floatingFilterComponent = 'dateFloatingFilter';
+        colDef.filterParams.comparator = function(filterDate: any, entryDate: any) {
+            // TODO: figure out logic here ...
+            let entry = new Date(entryDate);
+            console.log(entry, filterDate);
+            if (entry > filterDate) {
+                return 1;
+            } else if (entry < filterDate) {
+                return -1;
+            } else {
+                return 0;
+            }
+        };
+        colDef.filterParams.inRangeInclusive = true;
+        colDef.floatingFilterComponentParams = {
+            suppressFilterButton: true,
+            stateManager: state,
+            minValDefault: minVal,
+            maxValDefault: maxVal
+        };
     }
 
     setUpSelectorFilter(colDef: any, rowData: any, state: TableStateManager) {
@@ -386,7 +429,9 @@ interface ColumnDefinition {
     alias?: String;
     width?: Number;
     filter?: String;
-    filterParams: Object;
+    filterParams: {
+        comparator?: Function;
+    };
     cellRenderer: Function;
     sortable: Boolean;
     hide: Boolean;
