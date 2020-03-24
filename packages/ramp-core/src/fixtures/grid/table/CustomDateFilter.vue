@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div style="float: left; display: inline; width: 49%; z-index: 10;">
-            <input class="rv-input" style="width: 100%;" type="date" placeholder="date min" v-model="minVal" @change="minValChanged()" />
+        <div class="inline float-left text-xs w-1/2">
+            <input class="rv-input" type="date" placeholder="date min" v-model="minVal" @change="minValChanged()" />
         </div>
-        <div style="float: left; display: inline; width: 49%;">
-            <input class="rv-input" style="width: 100%;" type="date" placeholder="date max" v-model="maxVal" @change="maxValChanged()" />
+        <div class="inline float-left w-1/2">
+            <input class="rv-input" type="date" placeholder="date max" v-model="maxVal" @change="maxValChanged()" />
         </div>
     </div>
 </template>
@@ -44,27 +44,32 @@ export default class CustomNumberFilter extends Vue {
 
     setFilterModel(instance: any) {
         let that = this;
-        console.log(that.minVal, that.maxVal);
+        let maxPossibleDate: Date | String = new Date(8640000000000000);
+        maxPossibleDate = `${maxPossibleDate.getFullYear()}-${maxPossibleDate.getMonth() + 1}-${maxPossibleDate.getDate()}`;
+        let minPossibleDate: Date | String = new Date(0);
+        minPossibleDate = `${minPossibleDate.getFullYear()}-${minPossibleDate.getMonth() + 1}-${minPossibleDate.getDate()}`;
+
         if (that.maxVal !== '' && that.minVal !== '') {
-            console.log('yeah we\'re here')
             instance.setModel({
+                filterType: 'date',
                 type: 'inRange',
                 dateFrom: that.minVal,
                 dateTo: that.maxVal
             });
         } else if (that.minVal === '') {
-            console.log('here1')
             instance.setModel({
-                type: 'lessThanOrEqual',
-                dateFrom: that.maxVal
+                filterType: 'date',
+                type: 'inRange',
+                dateFrom: minPossibleDate,
+                dateTo: that.maxVal
             });
         } else if (that.maxVal === '') {
-            console.log('here2');
             instance.setModel({
-                type: 'greaterThanOrEqual',
-                dateFrom: that.minVal
+                filterType: 'date',
+                type: 'inRange',
+                dateFrom: that.minVal,
+                dateTo: maxPossibleDate
             });
-            // otherwise clear filters
         } else {
             instance.setModel(null);
         }
@@ -74,7 +79,6 @@ export default class CustomNumberFilter extends Vue {
     onParentModelChanged(parentModel: any) {}
 
     setModel() {
-        console.log('yo')
         return {
             filterType: 'date',
             type: 'inRange',
@@ -100,5 +104,9 @@ export default interface CustomNumberFilter {
 }
 .rv-input {
     @apply m-0 py-1;
+}
+.rv-input[type=date]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
 }
 </style>

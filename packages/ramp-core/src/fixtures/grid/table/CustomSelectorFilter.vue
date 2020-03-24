@@ -15,10 +15,10 @@ import { Vue, Watch, Component, Prop } from 'vue-property-decorator';
 export default class CustomSelectorFilter extends Vue {
     beforeMount() {
         this.selectedOption = this.params.defaultValue;
-
         this.colDef = this.params.column.colDef;
-        let rowData = this.params.rowData;
+
         const colName = this.params.column.colId;
+        let rowData = this.params.rowData;
 
         // obtain row data and filter out duplicates for selector list
         rowData = rowData.map((row: any) => row[colName]);

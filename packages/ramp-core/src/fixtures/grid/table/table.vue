@@ -132,13 +132,7 @@ export default class TableComponent extends Vue {
             const tableAttributePromise = fancyLayer.getTabularAttributes();
 
             tableAttributePromise.then((tableAttributes: any) => {
-                ['rvSymbol', 'rvInteractive', 'TMP_DATE', ...tableAttributes.columns].forEach((column: any) => {
-                    tableAttributes.fields.push({
-                        alias: 'Date',
-                        name: 'TMP_DATE',
-                        type: 'date'
-                    });
-
+                ['rvSymbol', 'rvInteractive', ...tableAttributes.columns].forEach((column: any) => {
                     let col: ColumnDefinition = {
                         headerName: column.title || '',
                         field: column.data || column,
@@ -159,7 +153,6 @@ export default class TableComponent extends Vue {
                         this.setUpSymbolsAndInteractive(col, this.columnDefs);
                     } else {
                         // set up column filters according to their respective types
-                        // TODO: implement date and selector filters.
                         if (NUM_TYPES.indexOf(fieldInfo.type) > -1) {
                             this.setUpNumberFilter(col, this.config.state);
                             col.filter = 'agNumberColumnFilter';
@@ -181,11 +174,7 @@ export default class TableComponent extends Vue {
                 });
 
                 // load layer rows
-                console.log(tableAttributes.rows);
                 this.rowData = tableAttributes.rows;
-                this.rowData.forEach((r: any) => {
-                    r['TMP_DATE'] = '05/26/1998';
-                });
                 this.updateFilterInfo();
             });
         });
@@ -233,9 +222,7 @@ export default class TableComponent extends Vue {
 
         colDef.floatingFilterComponent = 'dateFloatingFilter';
         colDef.filterParams.comparator = function(filterDate: any, entryDate: any) {
-            // TODO: figure out logic here ...
             let entry = new Date(entryDate);
-            console.log(entry, filterDate);
             if (entry > filterDate) {
                 return 1;
             } else if (entry < filterDate) {
