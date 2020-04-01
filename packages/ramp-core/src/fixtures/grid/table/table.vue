@@ -214,6 +214,20 @@ export default class TableComponent extends Vue {
         }
     }
 
+    // Clear all table filters.
+    // TODO: In the old version of RAMP we had "static filters". If we re-implement these at some point, this function
+    // needs to be modified to not wipe them.
+    clearFilters() {
+        // Replace the filter model with an empty model.
+        this.gridApi.setFilterModel({});
+
+        // Clear any saved filter state in the table state manager.
+        this.config.state.clearFilters();
+
+        // Refresh the column filters to reset inputs.
+        this.gridApi.refreshHeader();
+    }
+
     // Changes the filter status text in the grid.
     updateFilterStatus() {
         this.filterStatus = `${this.filterInfo.firstRow} - ${this.filterInfo.lastRow} of ${this.filterInfo.visibleRows} entries shown`;
