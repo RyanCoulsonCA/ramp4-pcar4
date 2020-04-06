@@ -121,6 +121,76 @@ export default class TableComponent extends Vue {
             rowBuffer: 0
         };
 
+        this.gridOptions.onCellFocused = (cell: any) => {
+            if (cell.rowIndex === null) return;
+            let focusedCell: any = null;
+
+            // get the selected row
+            let selectedRow: any = document.querySelectorAll(`[row-index="${cell.rowIndex}"]`)[1];
+
+            // find the selected column
+            for (let i = 0; i < selectedRow.children.length; i++) {
+                let child = selectedRow.children[i];
+
+                if (child.getAttribute('col-id') === cell.column.colId) {
+                    focusedCell = child;
+                }
+            }
+
+            // tooltip logic
+            if (!focusedCell) return;
+            let focusedCellText = focusedCell.children[0];
+
+            // display the tooltip if the width of the text is larger than the cell width (excluding the padding), and it's not a button.
+            if (focusedCellText.offsetWidth > focusedCell.offsetWidth - 48 && !focusedCellText.classList.contains('md-button')) {
+                const getOffset = (element: any) => {
+                    if (!element.getClientRects().length) {
+                        return { top: 0, left: 0 };
+                    }
+
+                    let rect = element.getBoundingClientRect();
+                    let win = element.ownerDocument.defaultView;
+                    return {
+                        top: rect.top + win.pageYOffset,
+                        left: rect.left + win.pageXOffset
+                    };
+                };
+
+                const positionTooltip = () => {
+                    const tooltip = document.getElementById('rv-render-tooltip');
+                    console.log(tooltip.style);
+                    // from my research the getComputedStyle function only works in IE 9+.
+                    const topMargin = getOffset(focusedCell).top + parseFloat(getComputedStyle(focusedCell, null).height.replace("px", "")) + 10;
+                    const topLeft = getOffset(focusedCell).left;
+                    
+                    tooltip.style.position = "fixed";
+                    tooltip.style.left = topLeft + 'px';
+                    tooltip.style.top = topMargin + 'px';
+
+                    console.log(topMargin, topLeft, this.$refs);
+                    // const overlayBottom = $('.ag-root').offset().top + $('.ag-root').height();
+
+                    // $(tooltip).offset({top: topMargin, left: topLeft});
+
+                    // let offBottom = $(tooltip).offset().top + $(tooltip).height() > overlayBottom - 20;
+                    // let offTop = $(focusedCell).offset().top - $(tooltip).height() - 10 < $('.ag-header-container').offset().top;
+
+                    // if(offBottom && !offTop) {
+                    //     // if the tooltip is off the grid, have it appear above the cell unless it would also be cut off by appearing above
+                    //     $(tooltip).offset({top: $(focusedCell).offset().top - $(tooltip).height() - 10});
+                    // }
+                };
+
+                // if the cell text is not  contained within newly focused cell, create an overlay tooltip which shows full text
+                this.gridOptions.overlayNoRowsTemplate = `<span class='rv-render-tooltip' ref="rv-tooltip" id='rv-render-tooltip'>${focusedCellText.innerHTML}</span>`;
+                this.gridOptions.api.showNoRowsOverlay();
+                positionTooltip();
+            } else {
+                // if a text is contained within newly focused cell, hide any overlay tooltips
+                this.gridOptions.api.hideOverlay();
+            }
+        };
+
         const fancyLayer: FeatureLayer | undefined = this.layers.find((l: any) => l.uid === this.layerUid);
         if (fancyLayer === undefined) {
             // this really shouldn't happen unless the wrong API call is made, but maybe we should
@@ -457,3 +527,17 @@ interface ColumnDefinition {
     lockPosition: Boolean;
 }
 </script>
+
+<style lang="scss">
+.rv-render-tooltip {
+    display: block;
+    position: absolute;
+    border: 1px solid #d3d3d3;
+    background-color: #f2f2f2;
+    padding: 2px 5px;
+    box-shadow: 1px 1px 2px #ccc;
+    max-width: 250px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
