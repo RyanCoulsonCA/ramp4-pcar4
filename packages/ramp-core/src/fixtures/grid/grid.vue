@@ -39,10 +39,6 @@
             </svg>
             <panel-options-menu>
                 <a href="#" @click="clearFilters()">Clear Filters</a>
-                <a href="#">Item 2</a>
-                <a href="#">Item 3</a>
-                <hr />
-                <a href="#">Item 4</a>
             </panel-options-menu>
             <pin @click="panel.pin()" :active="panel.isPinned"></pin>
             <close @click="panel.close()"></close>
