@@ -1,6 +1,6 @@
 <template>
     <panel-screen>
-        <template #header>{{ header }}</template>
+        <template #header>{{ layerName }}</template>
         <template #controls>
             <input
                 @keyup="updateQuickSearch()"
@@ -77,11 +77,12 @@ export default class Screen1 extends Vue {
 
     quicksearch: String = '';
     grid: any = undefined;
+    layerName: any = '';
 
     mounted() {
         this.grid = this.$refs.rvGrid;
+        this.layerName = this.grid.gridLayer.name;
     }
-
     updateQuickSearch(): void {
         this.grid.quicksearch = this.quicksearch;
         this.grid.updateQuickSearch();

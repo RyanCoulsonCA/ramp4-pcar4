@@ -114,6 +114,7 @@ export default class TableComponent extends Vue {
         visibleRows: 0
     };
     filterStatus = '';
+    gridLayer: any = undefined;
 
     beforeMount() {
         // load the grid config for this layer
@@ -137,17 +138,17 @@ export default class TableComponent extends Vue {
             rowBuffer: 0
         };
 
-        const fancyLayer: FeatureLayer | undefined = this.layers.find((l: any) => l.uid === this.layerUid);
-        if (fancyLayer === undefined) {
+        this.gridLayer = this.layers.find((l: any) => l.uid === this.layerUid);
+
+        if (this.gridLayer === undefined) {
             // this really shouldn't happen unless the wrong API call is made, but maybe we should
             // do something else here anyway.
             console.error(`Could not find layer with uid ${this.layerUid}.`);
             return;
         }
 
-        fancyLayer.isLayerLoaded().then(() => {
-            const tableAttributePromise = fancyLayer.getTabularAttributes();
-
+        this.gridLayer.isLayerLoaded().then(() => {
+            const tableAttributePromise = this.gridLayer.getTabularAttributes();
             tableAttributePromise.then((tableAttributes: any) => {
                 // Iterate through table columns and set up column definitions and column filter stuff.
                 // Also adds the `rvSymbol` and `rvInteractive` columns to the table.
@@ -195,6 +196,7 @@ export default class TableComponent extends Vue {
 
                 // load layer data into the table.
                 this.rowData = tableAttributes.rows;
+                console.log(this.rowData);
                 this.updateFilterInfo();
             });
         });
@@ -438,6 +440,7 @@ export default interface TableComponent {
     };
     filterStatus: string;
     filterByExtent: any;
+    gridLayer: any;
 }
 
 interface ColumnDefinition {
