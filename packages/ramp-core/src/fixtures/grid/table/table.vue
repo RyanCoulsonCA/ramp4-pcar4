@@ -111,8 +111,11 @@ export default class TableComponent extends Vue {
     filterStatus = '';
 
     beforeMount() {
+        console.log('hello world. I am the beforemount for the grid')
         // load the grid config for this layer
         this.config = this.grids[this.layerUid];
+
+        console.log(`This is my config:`, this.config, this.grids);
 
         // imported separate components
         this.frameworkComponents = {

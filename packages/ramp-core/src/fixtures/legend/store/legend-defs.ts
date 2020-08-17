@@ -101,6 +101,7 @@ export class LegendEntry extends LegendItem {
     _layerTree: TreeNode | undefined;
     _isLoaded: boolean;
     _symbologyStack: any;
+    _visibility: boolean;
 
     /**
      * Creates a new single legend entry.
@@ -111,6 +112,7 @@ export class LegendEntry extends LegendItem {
         this._type = legendEntry.type !== undefined ? legendEntry.type : LegendTypes.Entry;
         this._symbologyExpanded = legendEntry.symbologyExpanded !== undefined ? legendEntry.symbologyExpanded : false;
         this._parent = parent;
+        this._visibility = legendEntry.visibility !== undefined ? legendEntry.visibility : true;
 
         // find matching BaseLayer in layer store to the layerId in config
         this._layer = legendEntry.layers.find((layer: BaseLayer) => layer.id === this._id);
@@ -133,7 +135,7 @@ export class LegendEntry extends LegendItem {
 
     /** Returns visibility of layer. */
     get visibility(): boolean | undefined {
-        return this._layer?.getVisibility();
+        return this._visibility;
     }
 
     /** Returns uid associated with BaseLayer. */
@@ -159,11 +161,18 @@ export class LegendEntry extends LegendItem {
     /**
      * Sets visibility of the Legend Entry - needs to verify parent visibility is updated.
      * @param visibility - true if visible, false if invisible, undefined means toggle visibility
+     * @param propogate - true if the parent node should be notified of the visibility update
      */
-    toggleVisibility(visibility: boolean | undefined = undefined): void {
+    toggleVisibility(visibility: boolean | undefined = undefined, propogate: boolean = true): void {
         // TODO: need to rework some logic to check if legend entry is apart of a visibility set
-        if (visibility !== undefined && this._controls.includes(Controls.Visibility)) {
-            this._layer?.setVisibility(visibility);
+        if (this._controls.includes(Controls.Visibility)) {
+            this._layer?.setVisibility(visibility === undefined ? !this._layer.getVisibility() : visibility);
+            this._visibility = this._layer?.getVisibility();
+        }
+
+        // TODO: notify parent element of visibility change. Necessary for fancy checkbox magic.
+        if (this.parent !== undefined && propogate) {
+            (this.parent as LegendGroup).childUpdated();
         }
     }
 
@@ -275,8 +284,9 @@ export class LegendGroup extends LegendItem {
     /**
      * Toggles group visibility to show/hide children.
      * @param visible true if group should have visibility toggled on, false if group visibility should be toggled off, or undefined if group visibility should be toggled
+     * @param propogate - true if the parent node should be notified of the visibility update
      */
-    toggleVisibility(visible: boolean | undefined = undefined): void {
+    toggleVisibility(visible: boolean | undefined = undefined, propogate: boolean | undefined = true): void {
         // TODO: verify parent visibility b/c there can be complex nested groups or even sets
         const oldVal = this._visibility;
         visible !== undefined ? (this._visibility = visible) : (this._visibility = !this._visibility);
@@ -288,7 +298,7 @@ export class LegendGroup extends LegendItem {
         // if current item is a legend group, simply toggle visibility for all children
         if (this._type === LegendTypes.Group) {
             this._children.forEach((entry: any) => {
-                entry.toggleVisibility(visible);
+                entry.toggleVisibility(this._visibility, false);
             });
         } else {
             // otherwise ensure that there is only one child entry visible in a set
@@ -309,6 +319,27 @@ export class LegendGroup extends LegendItem {
                     }
                 });
             }
+        }
+
+        // TODO: notify parent element of visibility change. Necessary for fancy checkbox magic.
+        if (this.parent !== undefined && propogate) {
+            (this.parent as LegendGroup).childUpdated();
+        }
+    }
+
+    /**
+     * Called when a child of this group has been updated.
+     */
+    childUpdated() {
+        // Visibility Checkbox Check: Check visibility of all children.
+        let allChildrenDisabled = !this._children.some((entry: LegendEntry | LegendGroup) => {
+            return entry.visibility;
+        });
+
+        if (allChildrenDisabled) {
+            this.toggleVisibility(false);
+        } else {
+            this._visibility = true;
         }
     }
 }
