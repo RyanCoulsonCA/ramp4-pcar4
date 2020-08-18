@@ -33,6 +33,7 @@ export class LegendAPI extends FixtureInstance {
         let legendEntries: Array<LegendItem> = [];
         let stack: Array<any> = [];
         // initialize stack with all legend elements listed in config
+
         legendConfig.root.children.forEach(legendItem => stack.push(legendItem));
 
         // parse children from legend root structure through traversal
@@ -55,13 +56,13 @@ export class LegendAPI extends FixtureInstance {
 
             // TODO: link parent objects as required for visibility sets
             // push all children in current legend node back onto stack (for legend groups)
-            if (lastEntry?.children !== undefined && lastEntry.children.length > 0) {
-                lastEntry?.children.forEach((groupChild: any) => stack.push(groupChild));
-            }
+            // if (lastEntry?.children !== undefined && lastEntry.children.length > 0) {
+            //     lastEntry?.children.forEach((groupChild: any) => stack.push(groupChild));
+            // }
             // push all children in current legend node back onto stack (for visibility sets)
-            if (lastEntry?.exclusiveVisibility !== undefined && lastEntry.exclusiveVisibility.length > 0) {
-                lastEntry?.exclusiveVisibility.forEach((setChild: any) => stack.push(setChild));
-            }
+            // if (lastEntry?.exclusiveVisibility !== undefined && lastEntry.exclusiveVisibility.length > 0) {
+            //     lastEntry?.exclusiveVisibility.forEach((setChild: any) => stack.push(setChild));
+            // }
         }
 
         // console.log('all legend entries: ', legendEntries);

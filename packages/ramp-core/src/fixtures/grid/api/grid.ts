@@ -15,6 +15,7 @@ export class GridAPI extends FixtureInstance {
 
         // if no GridConfig exists for the given uid, create it.
         if (gridSettings === undefined) {
+            console.log(`Creating Grid Settings...`)
             gridSettings = {
                 uid: id,
                 state: new TableStateManager({

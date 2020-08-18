@@ -144,10 +144,12 @@ export default class BaseLayer extends BaseBase {
         //      visibility might need an optional FC index (whatever we're calling that)
 
         this._innerLayer.watch('visibility', (newval: boolean) => {
+            console.log('visibility changed');
             this.visibilityChanged.fireEvent(newval);
         });
 
         this._innerLayer.watch('opacity', (newval: number) => {
+            console.log('opacity changed');
             this.opacityChanged.fireEvent(newval);
         });
 

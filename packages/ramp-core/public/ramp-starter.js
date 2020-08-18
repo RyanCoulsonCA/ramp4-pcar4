@@ -98,30 +98,26 @@ function initRAMP() {
                     root: {
                         children: [
                             {
-                                layerId: 'WaterQuantity',
-                                name: 'Water Quantity'
-                            },
-                            {
-                                name: 'Visibility Set',
-                                exclusiveVisibility: [
+                                name: 'Bigger Group',
+                                children: [
                                     {
-                                        layerId: 'CleanAir',
-                                        name: 'Clean Air in Set'
-                                    },
-                                    {
-                                        name: 'Group in Set',
+                                        name: 'A Group',
                                         children: [
                                             {
-                                                layerId: 'CleanAir',
-                                                name: 'Clean Air in Nested Group'
+                                                layerId: 'WaterQuantity',
+                                                name: 'WaterQuantity'
                                             },
                                             {
-                                                layerId: 'WaterQuantity',
-                                                name: 'Water Quantity in Nested Group'
+                                                layerId: 'CleanAir',
+                                                name: 'CleanAir'
                                             }
                                         ]
                                     }
                                 ]
+                            },
+                            {
+                                layerId: 'WaterQuantity',
+                                name: 'Water Quantity Layer'
                             }
                         ]
                     }
