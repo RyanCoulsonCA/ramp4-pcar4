@@ -120,23 +120,23 @@ function initRAMP() {
                                 name: 'Visibility Set',
                                 exclusiveVisibility: [
                                     {
-                                        layerId: 'CleanAir',
-                                        name: 'Clean Air in Set'
-                                    },
-                                    {
-                                        name: 'Group in Set',
+                                        name: 'A Group',
                                         children: [
                                             {
                                                 layerId: 'WaterQuantity',
                                                 name: 'Water Quantity in Nested Group'
-                                            },
-                                            {
-                                                layerId: 'WaterQuality',
-                                                name: 'Water Quality in Nested Group'
                                             }
                                         ]
+                                    },
+                                    {
+                                        layerId: 'WaterQuality',
+                                        name: 'Water Quality in Nested Group'
                                     }
                                 ]
+                            },
+                            {
+                                layerId: 'WaterQuantity',
+                                name: 'Water Quantity Layer'
                             }
                         ]
                     }
