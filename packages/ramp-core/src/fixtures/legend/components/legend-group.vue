@@ -14,7 +14,7 @@
 
             <!-- visibility -->
             <div @click="legendItem.toggleVisibility(); legendItem.toggleExpanded();">
-                <checkbox :value="legendItem.visibility" />
+                <checkbox :value="legendItem.visibility" :isRadio="props && props.isVisibilitySet" />
             </div>
         </div>
 
@@ -41,6 +41,7 @@ import CheckboxComponent from './checkbox.vue';
 })
 export default class LegendGroup extends Vue {
     @Prop() legendItem!: LegendItem;
+    @Prop() props!: any;
 }
 </script>
 

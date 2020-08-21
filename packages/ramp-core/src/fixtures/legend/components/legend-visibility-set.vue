@@ -14,7 +14,7 @@
 
             <!-- visibility -->
             <div @click="legendItem.toggleVisibility(); legendItem.toggleExpanded();">
-                <checkbox :value="legendItem.visibility" />
+                <checkbox :value="legendItem.visibility" :isRadio="props && props.isVisibilitySet" />
             </div>
         </div>
 
@@ -37,13 +37,17 @@ import { Get, Sync, Call } from 'vuex-pathify';
 import { LegendStore } from '../store';
 import { LegendItem } from '../store/legend-defs';
 
+import CheckboxComponent from './checkbox.vue';
+
 @Component({
     components: {
-        LegendComponent: () => import('./legend-component.vue')
+        LegendComponent: () => import('./legend-component.vue'),
+        checkbox: CheckboxComponent
     }
 })
 export default class LegendGroup extends Vue {
     @Prop() legendItem!: LegendItem;
+    @Prop() props!: any;
 
     mounted() {
         console.log(`Visibility Set`, this.legendItem);

@@ -37,7 +37,7 @@ export default class SymbologyStack extends Vue {
     stack: any = [];
 
     mounted() {
-        // When the layer is loaded, get the icon.
+        // When the layer is loaded, fetch the symbology.
         if (this.layer.state !== 'rv-loaded') {
             this.layer.stateChanged.listen(() => {
                 this.getSymbologyStack();
