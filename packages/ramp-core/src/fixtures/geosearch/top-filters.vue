@@ -52,8 +52,7 @@
 <script lang="ts">
 import { ComputedRef } from 'vue';
 import { Vue } from 'vue-property-decorator';
-import { Get, Call } from 'vuex-pathify';
-import { get } from '@/store/pathify-helper';
+import { get, call } from '@/store/pathify-helper';
 
 import { GeosearchStore } from './store';
 
@@ -67,8 +66,21 @@ export default class GeosearchTopFiltersV extends Vue {
     // @Get(GeosearchStore.queryParams) queryParams!: any;
 
     // import required geosearch store actions
-    @Call(GeosearchStore.setProvince) setProvince!: (prov: any) => void;
-    @Call(GeosearchStore.setType) setType!: (type: any) => void;
+    // @Call(GeosearchStore.setProvince) setProvince!: (prov: any) => void;
+    // @Call(GeosearchStore.setType) setType!: (type: any) => void;
+
+    setProvince: any = call(GeosearchStore.setProvince);
+    setType: any = call(GeosearchStore.setType);
+
+    beforeMount() {
+        this.setProvince = (value: string) => {
+            this.$store.dispatch(GeosearchStore.setProvince, value);
+        };
+
+        this.setType = (value: string) => {
+            this.$store.dispatch(GeosearchStore.setType, value);
+        };
+    }
 
     // clear filters by setting filters to undefined
     clearFilters(): void {
