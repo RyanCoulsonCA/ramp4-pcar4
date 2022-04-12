@@ -463,6 +463,12 @@ let config = {
                 mapnav: { items: ['fullscreen', 'help', 'home', 'basemap'] },
                 'export-v1-title': {
                     text: 'All Your Base are Belong to Us'
+                },
+                geosearch: {
+                    geoNames:
+                        'https://geogratis.gc.ca/services/geoname/@{language}/geonames.json',
+                    geoLocation:
+                        'https://geogratis.gc.ca/services/geolocation/@{language}/locate'
                 }
             },
             system: { animate: true }

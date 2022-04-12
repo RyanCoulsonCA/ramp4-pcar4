@@ -5,6 +5,7 @@ import { geosearch } from './store/index';
 import GeosearchAppbarButtonV from './appbar-button.vue';
 
 import messages from './lang/lang.csv';
+import { GeosearchConfig } from './store/definitions';
 
 class GeosearchFixture extends GeosearchAPI {
     async added() {
@@ -13,7 +14,7 @@ class GeosearchFixture extends GeosearchAPI {
         // TODO: this appbar registration also seems like a common action; maybe automate
         this.$iApi.component('geosearch-appbar-button', GeosearchAppbarButtonV);
 
-        this.$vApp.$store.registerModule('geosearch', geosearch());
+        this.$vApp.$store.registerModule('geosearch', geosearch(this.config));
 
         this.$iApi.panel.register(
             {
