@@ -13,7 +13,7 @@ export default class TableStateManager {
     constructor(options?: TableStateOptions) {
         this.state = options ?? {};
         this._title = options?.title ?? '';
-        this._showFilter = options?.showFilter ?? true;
+        this._showFilter = options?.showFilter ?? false;
         this._filterByExtent = options?.filterByExtent ?? false;
         this._columns = {};
         this._open = true;

@@ -42,9 +42,34 @@
             v-show="!isLoadingGrid && !isErrorGrid"
             class="flex items-center justify-between pl-8 pb-8"
         >
+            <div class="flex flex-1 flex-col">
+                <div
+                    v-show="gridTitle !== ''"
+                    class="w-full font-bold"
+                    v-truncate
+                >
+                    {{ gridTitle }}
+                </div>
+
+                <div class="w-full text-sm" v-truncate>
+                    {{
+                        t('grid.filters.label.info', {
+                            range: `${filterInfo.firstRow} - ${filterInfo.lastRow}`,
+                            total: filterInfo.visibleRows
+                        })
+                    }}
+
+                    <span v-if="filterInfo.visibleRows !== rowData.length">{{
+                        t('grid.filters.label.filtered', {
+                            max: rowData.length
+                        })
+                    }}</span>
+                </div>
+            </div>
+
             <!-- show grid components if done loading -->
             <div
-                class="flex items-center pb-4 mr-8 min-w-0"
+                class="flex flex-1 items-center justify-center pb-4 mr-8 min-w-0"
                 v-show="config.state.search"
             >
                 <!-- global search bar -->
@@ -97,7 +122,7 @@
                 </div>
             </div>
 
-            <div class="pb-2 flex ml-auto">
+            <div class="pb-2 flex flex-1 justify-end ml-auto">
                 <!-- show/hide columns -->
                 <column-dropdown
                     :columnApi="columnApi"
@@ -270,35 +295,6 @@
                         </div>
                     </a>
                 </dropdown-menu>
-            </div>
-        </div>
-        <span
-            v-show="!isLoadingGrid && !isErrorGrid"
-            class="w-full h-0 shadow-clip"
-        ></span>
-
-        <!-- grid title and number of visible entries -->
-        <div
-            v-show="!isLoadingGrid && !isErrorGrid"
-            class="pt-8 pl-8 pb-4 mb-0 bg-gray-50"
-        >
-            <div v-show="gridTitle !== ''" class="w-full font-bold" v-truncate>
-                {{ gridTitle }}
-            </div>
-
-            <div class="w-full text-sm" v-truncate>
-                {{
-                    t('grid.filters.label.info', {
-                        range: `${filterInfo.firstRow} - ${filterInfo.lastRow}`,
-                        total: filterInfo.visibleRows
-                    })
-                }}
-
-                <span v-if="filterInfo.visibleRows !== rowData.length">{{
-                    t('grid.filters.label.filtered', {
-                        max: rowData.length
-                    })
-                }}</span>
             </div>
         </div>
 
@@ -821,9 +817,10 @@ const setUpSpecialColumns = (
             suppressMenu: true,
             floatingFilter: config.value.state.colFilter,
             pinned: 'left',
-            maxWidth: 60,
+            maxWidth: 42,
             cellStyle: () => {
                 return {
+                    'background-color': '#fff',
                     'padding-left': '2px',
                     'padding-right': '2px',
                     display: 'flex',
@@ -846,10 +843,11 @@ const setUpSpecialColumns = (
     if (col.field === 'rvInteractive') {
         let detailsDef = {
             sortable: false,
+            pinned: 'left',
             filter: false,
             lockPosition: true,
             isStatic: true,
-            maxWidth: 48,
+            maxWidth: 42,
             cellStyle: () => {
                 return {
                     padding: '0px'
@@ -866,10 +864,11 @@ const setUpSpecialColumns = (
 
         let zoomDef = {
             sortable: false,
+            pinned: 'left',
             filter: false,
             lockPosition: true,
             isStatic: true,
-            maxWidth: 48,
+            maxWidth: 42,
             cellStyle: () => {
                 return {
                     padding: '0px'
@@ -878,7 +877,8 @@ const setUpSpecialColumns = (
             cellRenderer: ZoomButtonRendererV,
             cellRendererParams: {
                 $iApi: iApi,
-                layerCols: layerCols.value
+                layerCols: layerCols.value,
+                isTeleport: props.panel.teleport !== undefined
             }
         };
         colDef.push(zoomDef);
@@ -891,7 +891,7 @@ const setUpSpecialColumns = (
             filter: false,
             lockPosition: true,
             isStatic: true,
-            maxWidth: 82,
+            maxWidth: 42,
             cellRenderer: (cell: any) => {
                 const layer: LayerInstance | undefined =
                     iApi.geo.layer.getLayer(cell.data.rvUid);
@@ -899,6 +899,7 @@ const setUpSpecialColumns = (
                 const iconContainer = document.createElement('span');
                 const oid = cell.data[oidField.value];
                 layer.getIcon(oid).then(i => {
+                    console.log(i);
                     iconContainer.innerHTML = i;
                 });
                 return iconContainer;
@@ -906,7 +907,9 @@ const setUpSpecialColumns = (
             cellStyle: () => {
                 return {
                     paddingTop: '7px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    paddingLeft: '5px',
+                    paddingRight: '0px'
                 };
             },
             cellRendererParams: {
@@ -1392,9 +1395,9 @@ const setUpColumns = () => {
                 // Iterate through table columns and set up column definitions and column filter stuff.
                 // Also adds the `rvSymbol` and `rvInteractive` columns to the table.
                 [
-                    'rvRowIndex',
-                    'rvSymbol',
+                    'rvRowIndex', // removed row counter. Do we still want this to be optionally shown?
                     'rvInteractive',
+                    'rvSymbol',
                     ...mergedTableAttrs.columns
                 ].forEach((column: any) => {
                     if (
@@ -1531,6 +1534,7 @@ const setUpColumns = () => {
 };
 
 onBeforeMount(() => {
+    console.log('My panel', props.panel);
     config.value = gridStore.grids[props.gridId];
 
     isLoadingGrid.value = true;
@@ -1628,8 +1632,16 @@ onBeforeUnmount(() => {
 :deep(.ag-header-cell-sortable) {
     cursor: default;
 }
-:deep(.ag-pinned-left-cols-container .ag-row) {
-    background-color: #f9f9f9;
+:deep(.ag-row) {
+    border-width: 1px;
+    border-left: 0px;
+    border-right: 0px;
+}
+:deep(.ag-pinned-left-cols-container) {
+    overflow-x: hidden;
+}
+:deep(.ag-pinned-left-cols-container > .ag-row) {
+    background-color: #fff !important;
 }
 :deep(.ag-pinned-left-cols-container .ag-cell) {
     border-right: none !important;
@@ -1642,8 +1654,12 @@ onBeforeUnmount(() => {
     padding: 5px;
     background: white;
 }
-:deep(.ag-header-cell) {
+:deep(.ag-header-container > .ag-header-row > .ag-header-cell) {
     background: #f9f9f9;
+}
+:deep(.ag-pinned-left-header) {
+    background-color: #fff;
+    border: 0px;
 }
 :deep(.ag-root .rv-input::placeholder) {
     font-size: 12px;
