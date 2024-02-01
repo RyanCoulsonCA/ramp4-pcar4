@@ -40,10 +40,10 @@ export class DetailsAPI extends FixtureInstance {
         });
 
         // Open the details panel.
-        const detailsPanel = this.$iApi.panel.get('details-panel');
-        if (!detailsPanel.isOpen) {
+        const layersPanel = this.$iApi.panel.get('details-layers');
+        if (!layersPanel.isOpen) {
             this.$iApi.panel.open({
-                id: 'details-panel'
+                id: 'details-layers'
             });
         }
     }
@@ -60,10 +60,13 @@ export class DetailsAPI extends FixtureInstance {
         open: boolean | undefined
     ): void {
         // Close the identified layers panel.
-        const panel = this.$iApi.panel.get('details-panel');
+        const panel = this.$iApi.panel.get('details-layers');
         if (panel.isOpen) {
             this.$iApi.panel.close(panel);
         }
+
+        // Toggle or update the items panel
+        const itemsPanel = this.$iApi.panel.get('details-items');
 
         // result: is IdentifyResult class
         const props: any = {
@@ -78,8 +81,7 @@ export class DetailsAPI extends FixtureInstance {
                 ],
                 uid: featureData.uid,
                 loading: Promise.resolve(),
-                loaded: true,
-                requestTime: Date.now()
+                loaded: true
             }
         };
 
@@ -103,18 +105,22 @@ export class DetailsAPI extends FixtureInstance {
 
         // toggle rules based on last opened details panel
         if (open === false) {
-            this.$iApi.panel!.close(panel);
-        } else if (!panel.isOpen) {
-            this.detailsStore.payload = [props.result];
-
+            this.$iApi.panel!.close(itemsPanel);
+        } else if (!itemsPanel.isOpen) {
             // open the items panel
             this.$iApi.panel!.open({
-                id: 'details-panel',
-                screen: 'details-screen',
+                id: 'details-items',
+                screen: 'item-screen',
+                props: props
+            });
+        } else if (prevFeatureId !== currFeatureId || open === true) {
+            // update the items screen
+            itemsPanel!.show({
+                screen: 'item-screen',
                 props: props
             });
         } else {
-            this.$iApi.panel!.close(panel);
+            this.$iApi.panel!.close(itemsPanel);
         }
     }
 
@@ -130,8 +136,8 @@ export class DetailsAPI extends FixtureInstance {
             this.detailsStore.defaultTemplates = config.templates;
         }
 
-        this.handlePanelWidths(['details-panel']);
-        this.handlePanelTeleports(['details-panel']);
+        this.handlePanelWidths(['details-items', 'details-layers']);
+        this.handlePanelTeleports(['details-items', 'details-layers']);
 
         // get all layer fixture configs
         const layerDetailsConfigs: any = this.getLayerFixtureConfigs();

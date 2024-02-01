@@ -453,6 +453,7 @@ const itemChanged = () => {
                     : ''
             }`
         );
+
         if (hilightToggle.value && supportsFeatures.value && isMapLayer.value) {
             details.value.hilightDetailsItems(
                 props.result.items[currentIdx.value],
@@ -646,7 +647,7 @@ onMounted(() => {
 
     handlers.value.push(
         iApi.event.on(GlobalEvents.PANEL_CLOSED, (panel: PanelInstance) => {
-            if (panel.id == 'details-items') {
+            if (panel.id == 'details-panel') {
                 detailsClosed();
             }
         })
@@ -654,7 +655,7 @@ onMounted(() => {
 
     handlers.value.push(
         iApi.event.on(GlobalEvents.PANEL_MINIMIZED, (panel: PanelInstance) => {
-            if (panel.id == 'details-items') {
+            if (panel.id == 'details-panel') {
                 detailsMinimized();
             }
         })
