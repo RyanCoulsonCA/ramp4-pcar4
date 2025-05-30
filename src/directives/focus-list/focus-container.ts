@@ -25,8 +25,8 @@ export const FocusContainer: Directive = {
         // check whether the element is inside a RAMP app, and proceed only if it is
         // let's hope that no one decides to use class inner-shell on their elements
         // couldn't find a better solution since we don't have access to the vue app in here
-        const rampShells = [...document.querySelectorAll('.inner-shell')];
-        if (rampShells.some(shell => shell.contains(el))) {
+        const rampShells = [...document.querySelectorAll('.outer-shell')];
+        if (rampShells.some((shell) => shell.contains(el))) {
             managers.push(new FocusContainerManager(el));
         }
     },
@@ -153,7 +153,7 @@ class FocusContainerManager {
      */
     enableTabbing() {
         let first_tabbable_item: any = undefined;
-        Array.prototype.map.call(this.element.querySelectorAll(TABBABLE_TAGS), el => {
+        Array.prototype.map.call(this.element.querySelectorAll(TABBABLE_TAGS), (el) => {
             // !!el.offsetParent means it is visible
             if (
                 (el.closest(FOCUS_ATTRS) === this.element ||

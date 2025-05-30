@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full relative">
+    <div class="outer-shell h-full relative" v-focus-container>
         <!-- TODO: should inner shell be a separate component? -->
         <div class="inner-shell absolute top-0 left-0 h-full w-full pointer-events-none">
             <div class="sr-only screen-reader-alert"></div>
