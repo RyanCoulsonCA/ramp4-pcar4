@@ -1,0 +1,1 @@
+import{b$ as s,cw as c}from"./main-oOKOotWl.js";import{m as e}from"./queryTopFeatures-Kk-NoPYT.js";async function m(o,r,t){const a=s(o);return(await e(a,c.from(r),{...t})).data.objectIds}export{m as executeForTopIds};

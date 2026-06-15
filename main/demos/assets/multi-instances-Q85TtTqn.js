@@ -1,0 +1,1 @@
+import"./multi-instances-Bfe2jCX3.js";
